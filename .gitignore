@@ -1,0 +1,56 @@
+# =====================
+# Android / Gradle
+# =====================
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Build output
+/build
+**/build/
+
+# Gradle
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+
+# Local configuration
+local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.idea/deploymentTargetDropDown.xml
+.idea/misc.xml
+
+# Keystore files (VERY IMPORTANT)
+*.jks
+*.keystore
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Emulator / device
+*.hprof
+captures/
+
+# External native build
+.externalNativeBuild/
+.cxx/
+
+# Kotlin
+kotlin/

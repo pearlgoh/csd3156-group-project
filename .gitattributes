@@ -1,0 +1,37 @@
+# =====================
+# Line endings
+# =====================
+* text=auto eol=lf
+
+# Gradle
+*.gradle text
+*.gradle.kts text
+
+# Kotlin / Java
+*.kt text
+*.java text
+
+# XML resources
+*.xml text
+
+# Properties
+*.properties text
+
+# Shell scripts
+*.sh text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.svg binary
+*.jar binary
+*.aar binary
+*.keystore binary
+*.jks binary
+
+# Prevent diff noise for generated files
+*.apk binary
+*.aab binary
