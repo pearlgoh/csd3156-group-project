@@ -61,12 +61,18 @@ class GameViewModel : ViewModel() {
             tile.column == firstTile.column &&
             index == 0
         ) {
+            App.soundManager.playTapSound()
             _gameState.value = state.copy(
                 tiles = state.tiles.drop(1),
                 score = state.score + 1
             )
         } else {
+            App.soundManager.stopBGM()
             _gameState.value = state.copy(gameOver = true)
         }
+    }
+
+    fun startGame() {
+        App.soundManager.playBGM()
     }
 }
