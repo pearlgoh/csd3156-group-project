@@ -1,9 +1,6 @@
 package com.csd3156.game
 
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.lifecycle.ViewModel
-import androidx.wear.compose.materialcore.screenHeightDp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -63,10 +60,6 @@ class GameViewModel : ViewModel() {
         if (firstTile != null &&
             tile.column == firstTile.column &&
             index == 0
-            //tile.y == firstTile.y
-            //isFirstTile(tile) //&&
-            //firstTile.column == touchedColumn &&
-            //firstTile.y + tileHeight >= screenHeight - tileHeight
         ) {
             _gameState.value = state.copy(
                 tiles = state.tiles.drop(1),
@@ -76,8 +69,4 @@ class GameViewModel : ViewModel() {
             _gameState.value = state.copy(gameOver = true)
         }
     }
-
-//    private fun isFirstTile(tile: Tile): Boolean {
-//        firstTile == tile
-//    }
 }

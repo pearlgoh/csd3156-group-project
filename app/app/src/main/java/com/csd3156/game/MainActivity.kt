@@ -14,7 +14,6 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-//import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -42,8 +41,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             GameTheme {
-                //setContentView(GameView(this)) // temp
-                //GameApp()
                 Nav(Modifier.padding(32.dp).fillMaxSize(), this, gameView)
             }
         }
@@ -85,36 +82,6 @@ fun Nav(mod: Modifier, ctx: Context, gameView: GameViewModel) {
     )
 }
 
-@PreviewScreenSizes
-@Composable
-fun GameApp() {
-    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
-
-//    NavigationSuiteScaffold(
-//        navigationSuiteItems = {
-//            AppDestinations.entries.forEach {
-//                item(
-//                    icon = {
-//                        Icon(
-//                            it.icon,
-//                            contentDescription = it.label
-//                        )
-//                    },
-//                    label = { Text(it.label) },
-//                    selected = it == currentDestination,
-//                    onClick = { currentDestination = it }
-//                )
-//            }
-//        }
-//    ) {
-//        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//            Greeting(
-//                name = "Android",
-//                modifier = Modifier.padding(innerPadding)
-//            )
-//        }
-//    }
-}
 
 enum class AppDestinations(
     val label: String,
