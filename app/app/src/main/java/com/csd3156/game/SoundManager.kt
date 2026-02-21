@@ -22,7 +22,7 @@ class SoundManager(private val context: Context) {
             .build()
 
         // Load tap sound
-        // Note: You need to add tap_sound.mp3 to res/raw
+        // Note: Need to add tap_sound.mp3 to res/raw
         val tapResId = context.resources.getIdentifier("tap_sound", "raw", context.packageName)
         if (tapResId != 0) {
             tapSoundId = soundPool.load(context, tapResId, 1)
@@ -30,12 +30,14 @@ class SoundManager(private val context: Context) {
     }
 
     fun playBGM() {
+        // Note: Need to add bgm.mp3 to res/raw
         val bgmResId = context.resources.getIdentifier("bgm", "raw", context.packageName)
         if (bgmResId == 0) return
 
         if (mediaPlayer == null) {
             mediaPlayer = MediaPlayer.create(context, bgmResId)
             mediaPlayer?.isLooping = true
+            mediaPlayer?.setVolume(0.3f, 0.3f)
             mediaPlayer?.start()
         } else if (mediaPlayer?.isPlaying == false) {
             mediaPlayer?.start()
@@ -54,7 +56,7 @@ class SoundManager(private val context: Context) {
 
     fun playTapSound() {
         if (tapSoundId != -1) {
-            soundPool.play(tapSoundId, 1f, 1f, 0, 0, 1f)
+            soundPool.play(tapSoundId, 0.7f, 0.7f, 0, 0, 1f)
         }
     }
 }
