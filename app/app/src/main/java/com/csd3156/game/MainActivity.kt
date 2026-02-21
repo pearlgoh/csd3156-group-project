@@ -30,27 +30,33 @@ import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDe
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.csd3156.game.ui.GameOverScreen
+import com.csd3156.game.ui.ScoreboardScreen
+import com.csd3156.game.ui.ScoreboardViewModel
 import com.csd3156.game.ui.theme.GameTheme
 import androidx.activity.viewModels
 import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
     private val gameView by viewModels<GameViewModel>()
+    private val scoreboardView by viewModels<ScoreboardViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             GameTheme {
-                Nav(Modifier.padding(32.dp).fillMaxSize(), this, gameView)
+                Nav(Modifier.padding(32.dp).fillMaxSize(), this, gameView, scoreboardView)
             }
         }
     }
 }
 
 data object GameView
+data class GameOverView(val score: Int)
+data object ScoreboardView
 
 @Composable
-fun Nav(mod: Modifier, ctx: Context, gameView: GameViewModel) {
+fun Nav(mod: Modifier, ctx: Context, gameView: GameViewModel, scoreboardViewModel: ScoreboardViewModel) {
     val viewModelFactory = MainViewModelFactory(/*(application as App).repository*/)
 
     val backstack = remember { mutableStateListOf<Any>(GameView) }
@@ -73,7 +79,41 @@ fun Nav(mod: Modifier, ctx: Context, gameView: GameViewModel) {
         entryProvider = {
                 key -> when(key) {
             is GameView -> NavEntry(key) {
-                GameScreen(modifier = mod, context = ctx, viewModel = gameView)
+                GameScreen(
+                    modifier = mod,
+                    context = ctx,
+                    viewModel = gameView,
+                    onGameOver = { score ->
+                        backstack.add(GameOverView(score))
+                    }
+                )
+            }
+
+            is GameOverView -> NavEntry(key) {
+                GameOverScreen(
+                    score = key.score,
+                    onPlayAgain = {
+                        gameView.resetGame()
+                        backstack.removeLastOrNull()
+                    },
+                    onViewScoreboard = {
+                        backstack.removeLastOrNull()
+                        backstack.add(ScoreboardView)
+                    },
+                    modifier = mod,
+                    scoreboardViewModel = scoreboardViewModel
+                )
+            }
+
+            is ScoreboardView -> NavEntry(key) {
+                ScoreboardScreen(
+                    onBack = {
+                        gameView.resetGame()
+                        backstack.removeLastOrNull()
+                    },
+                    modifier = mod,
+                    viewModel = scoreboardViewModel
+                )
             }
 
             else -> NavEntry(key) { Text("") }

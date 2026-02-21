@@ -51,6 +51,11 @@ class GameViewModel : ViewModel() {
         )
     }
 
+    fun resetGame() {
+        _gameState.value = GameState()
+        tileBuffer = 0f
+    }
+
     fun handleTap(tile: Tile/*touchedColumn: Int*/, index: Int, screenHeight: Float) {
         val state = _gameState.value
         if (state.gameOver) return

@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,7 +36,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 
 @Composable
-fun GameScreen(viewModel: GameViewModel, modifier: Modifier, context: Context) {
+fun GameScreen(viewModel: GameViewModel, modifier: Modifier, context: Context, onGameOver: (score: Int) -> Unit = {}) {
     //val textSize = 80f
 
     val columnCount = 4
@@ -49,6 +50,12 @@ fun GameScreen(viewModel: GameViewModel, modifier: Modifier, context: Context) {
         modifier = modifier.fillMaxSize()
     ) {
         val state by viewModel.gameState.collectAsState()
+
+        LaunchedEffect(state.gameOver) {
+            if (state.gameOver) {
+                onGameOver(state.score)
+            }
+        }
 
         // draw
 
@@ -91,10 +98,6 @@ fun GameScreen(viewModel: GameViewModel, modifier: Modifier, context: Context) {
                 ) { }
             }
 
-            if (state.gameOver) {
-                Text("GAME OVER", fontSize = 48.sp, textAlign = TextAlign.Center,
-                    modifier = Modifier.background(color = Color.White).fillMaxWidth().align(Alignment.Center))
-            }
         }
     }
 }
