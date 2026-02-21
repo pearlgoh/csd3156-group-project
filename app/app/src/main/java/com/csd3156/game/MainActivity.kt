@@ -31,6 +31,7 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.csd3156.game.ui.GameOverScreen
+import com.csd3156.game.ui.MainMenuScreen
 import com.csd3156.game.ui.ScoreboardScreen
 import com.csd3156.game.ui.ScoreboardViewModel
 import com.csd3156.game.ui.theme.GameTheme
@@ -51,6 +52,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+data object MainMenuView
 data object GameView
 data class GameOverView(val score: Int)
 data object ScoreboardView
@@ -59,7 +61,7 @@ data object ScoreboardView
 fun Nav(mod: Modifier, ctx: Context, gameView: GameViewModel, scoreboardViewModel: ScoreboardViewModel) {
     val viewModelFactory = MainViewModelFactory(/*(application as App).repository*/)
 
-    val backstack = remember { mutableStateListOf<Any>(GameView) }
+    val backstack = remember { mutableStateListOf<Any>(MainMenuView) }
     val viewModel = viewModel<MainViewModel>(factory = viewModelFactory)
 
     var currBot by remember { mutableStateOf("") }
@@ -78,6 +80,19 @@ fun Nav(mod: Modifier, ctx: Context, gameView: GameViewModel, scoreboardViewMode
         ),
         entryProvider = {
                 key -> when(key) {
+            is MainMenuView -> NavEntry(key) {
+                MainMenuScreen(
+                    onPlay = {
+                        gameView.resetGame()
+                        backstack.add(GameView)
+                    },
+                    onScoreboard = {
+                        backstack.add(ScoreboardView)
+                    },
+                    modifier = mod
+                )
+            }
+
             is GameView -> NavEntry(key) {
                 GameScreen(
                     modifier = mod,
@@ -97,7 +112,8 @@ fun Nav(mod: Modifier, ctx: Context, gameView: GameViewModel, scoreboardViewMode
                         backstack.removeLastOrNull()
                     },
                     onViewScoreboard = {
-                        backstack.removeLastOrNull()
+                        // Clear down to MainMenuView, then show scoreboard
+                        while (backstack.size > 1) backstack.removeLastOrNull()
                         backstack.add(ScoreboardView)
                     },
                     modifier = mod,
@@ -108,7 +124,6 @@ fun Nav(mod: Modifier, ctx: Context, gameView: GameViewModel, scoreboardViewMode
             is ScoreboardView -> NavEntry(key) {
                 ScoreboardScreen(
                     onBack = {
-                        gameView.resetGame()
                         backstack.removeLastOrNull()
                     },
                     modifier = mod,

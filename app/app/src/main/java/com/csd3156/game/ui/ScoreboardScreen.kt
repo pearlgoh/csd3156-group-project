@@ -47,7 +47,7 @@ fun ScoreboardScreen(
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
         ) {
-            Text("Play Again")
+            Text("Back")
         }
 
         if (scores.isEmpty()) {
