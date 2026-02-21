@@ -21,6 +21,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun GameOverScreen(
@@ -32,6 +43,14 @@ fun GameOverScreen(
 ) {
     var playerName by remember { mutableStateOf("") }
 
+    var titleVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        titleVisible = true
+    }
+    val topScores by scoreboardViewModel.topScores.collectAsState()
+    val isNewHighScore = topScores.isEmpty() || score > (topScores.firstOrNull()?.score ?: 0)
+
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -39,18 +58,49 @@ fun GameOverScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = "GAME OVER",
-            fontSize = 48.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+
+        AnimatedVisibility(
+            visible = titleVisible,
+            enter = slideInVertically(
+                initialOffsetY = { -it },
+                animationSpec = tween(600)
+            )
+        ) {
+            Text(
+                text = "GAME OVER",
+                fontSize = 48.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+        }
 
         Text(
             text = "Score: $score",
             fontSize = 32.sp,
             modifier = Modifier.padding(bottom = 32.dp)
         )
+
+        if (isNewHighScore) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+                    .background(
+                        color = Color(0xFFFFD700),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .padding(vertical = 10.dp)
+            ) {
+                Text(
+                    text = "🏆 New High Score!",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
 
         OutlinedTextField(
             value = playerName,
