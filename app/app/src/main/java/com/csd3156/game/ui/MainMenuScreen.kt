@@ -1,5 +1,6 @@
 package com.csd3156.game.ui
 
+import androidx.compose.animation.core.InfiniteTransition
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -47,7 +48,16 @@ fun MainMenuScreen(
         label = "pulseScale"
     )
 
-    // From main: LofiBackground Box wrapper
+    val floatOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = -12f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 600),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "floatOffset"
+    )
+
     Box(modifier = modifier.fillMaxSize()) {
         LofiBackground()
 
@@ -59,7 +69,7 @@ fun MainMenuScreen(
         ) {
             Spacer(modifier = Modifier.weight(0.3f))
 
-            // From HEAD: logo with pulse animation applied
+
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Game Logo",
@@ -69,7 +79,6 @@ fun MainMenuScreen(
                     .graphicsLayer(scaleX = pulseScale, scaleY = pulseScale)
             )
 
-            // From main: split title + white styling
             Text(
                 text = "TILE",
                 fontSize = 52.sp,
@@ -92,12 +101,12 @@ fun MainMenuScreen(
                 modifier = Modifier.padding(bottom = 48.dp)
             )
 
-            // From main: white-styled buttons
             Button(
                 onClick = onPlay,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 16.dp)
+                    .graphicsLayer(translationY = floatOffset),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White.copy(alpha = 0.15f),
                     contentColor = Color.White

@@ -45,7 +45,7 @@ fun GameOverScreen(
 ) {
     var playerName by remember { mutableStateOf("") }
 
-    // From HEAD: animation trigger + high score detection
+
     var titleVisible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         titleVisible = true
@@ -53,7 +53,7 @@ fun GameOverScreen(
     val topScores by scoreboardViewModel.topScores.collectAsState()
     val isNewHighScore = topScores.isEmpty() || score > (topScores.firstOrNull()?.score ?: 0)
 
-    // From main: LofiBackground Box wrapper
+
     Box(modifier = modifier.fillMaxSize()) {
         LofiBackground()
 
@@ -65,7 +65,7 @@ fun GameOverScreen(
             verticalArrangement = Arrangement.Center
         ) {
 
-            // From HEAD: animated slide-in title
+
             AnimatedVisibility(
                 visible = titleVisible,
                 enter = slideInVertically(
@@ -89,7 +89,7 @@ fun GameOverScreen(
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
-            // From HEAD: new high score banner
+
             if (isNewHighScore) {
                 Box(
                     modifier = Modifier
@@ -112,7 +112,6 @@ fun GameOverScreen(
                 }
             }
 
-            // From main: white-styled text field
             OutlinedTextField(
                 value = playerName,
                 onValueChange = { playerName = it },
