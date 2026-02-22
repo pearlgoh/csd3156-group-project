@@ -46,7 +46,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             GameTheme {
-                Nav(Modifier.padding(32.dp).fillMaxSize(), this, gameView, scoreboardView)
+                Nav(Modifier.fillMaxSize(), this, gameView, scoreboardView)
             }
         }
     }
