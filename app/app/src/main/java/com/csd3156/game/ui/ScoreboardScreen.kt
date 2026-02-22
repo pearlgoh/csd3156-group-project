@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -38,7 +40,11 @@ fun ScoreboardScreen(
     modifier: Modifier = Modifier,
     viewModel: ScoreboardViewModel = viewModel()
 ) {
-    val scores by viewModel.topScores.collectAsState()
+    val localScores by viewModel.topScores.collectAsState()
+    val globalScores by viewModel.globalScores.collectAsState()
+    val isShowingGlobal by viewModel.isShowingGlobal.collectAsState()
+
+    val scores = if (isShowingGlobal) globalScores else localScores
 
     Column(
         modifier = modifier.fillMaxSize(),
@@ -48,8 +54,48 @@ fun ScoreboardScreen(
             text = "Scoreboard",
             fontSize = 36.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 24.dp)
+            modifier = Modifier.padding(bottom = 16.dp)
         )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                onClick = { if (isShowingGlobal) viewModel.toggleScoreboard() },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (!isShowingGlobal)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = if (!isShowingGlobal)
+                        MaterialTheme.colorScheme.onPrimary
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
+                Text("Local")
+            }
+            Button(
+                onClick = { if (!isShowingGlobal) viewModel.toggleScoreboard() },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isShowingGlobal)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = if (isShowingGlobal)
+                        MaterialTheme.colorScheme.onPrimary
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
+                Text("Global")
+            }
+        }
 
         if (scores.isEmpty()) {
             Box(
@@ -57,7 +103,10 @@ fun ScoreboardScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No scores yet.\nPlay a game!",
+                    text = if (isShowingGlobal)
+                        "No global scores yet.\nPlay a game and go online!"
+                    else
+                        "No scores yet.\nPlay a game!",
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center
                 )
