@@ -1,5 +1,6 @@
 package com.csd3156.game
 
+
 import android.R.attr.height
 import android.content.Context
 import androidx.compose.foundation.Canvas
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 
@@ -40,6 +42,10 @@ fun GameScreen(viewModel: GameViewModel, modifier: Modifier, context: Context, o
     //val textSize = 80f
 
     val columnCount = 4
+
+    LaunchedEffect(Unit) {
+        viewModel.startGame()
+    }
 
     val configuration = LocalConfiguration.current
     val screenHeightDp = configuration.screenHeightDp

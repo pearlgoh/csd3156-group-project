@@ -50,6 +50,16 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onPause() {
+        super.onPause()
+        App.soundManager.pauseBGM()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        App.soundManager.playBGM()
+    }
 }
 
 data object MainMenuView

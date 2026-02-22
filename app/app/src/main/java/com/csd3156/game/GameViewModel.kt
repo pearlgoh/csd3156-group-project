@@ -44,6 +44,10 @@ class GameViewModel : ViewModel() {
 
         val gameOver = updatedTiles.any { it.y > screenHeight }
 
+        if (gameOver && !state.gameOver) {
+            App.soundManager.stopBGM()
+        }
+
         _gameState.value = state.copy(
             tiles = updatedTiles,
             speed = state.speed + 0.02f,
@@ -52,6 +56,7 @@ class GameViewModel : ViewModel() {
     }
 
     fun resetGame() {
+        App.soundManager.stopBGM()
         _gameState.value = GameState()
         tileBuffer = 0f
     }
@@ -66,12 +71,18 @@ class GameViewModel : ViewModel() {
             tile.column == firstTile.column &&
             index == 0
         ) {
+            App.soundManager.playTapSound()
             _gameState.value = state.copy(
                 tiles = state.tiles.drop(1),
                 score = state.score + 1
             )
         } else {
+            App.soundManager.stopBGM()
             _gameState.value = state.copy(gameOver = true)
         }
+    }
+
+    fun startGame() {
+        App.soundManager.playBGM()
     }
 }

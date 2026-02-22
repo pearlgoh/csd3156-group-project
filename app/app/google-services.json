@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "979670040538",
+    "project_id": "csd3156-group-project",
+    "storage_bucket": "csd3156-group-project.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:979670040538:android:80737b62ad294b77c60ae3",
+        "android_client_info": {
+          "package_name": "com.csd3156.game"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyASp1KxsGQsTBxBCLcz2lBT24AIev-u-lo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
