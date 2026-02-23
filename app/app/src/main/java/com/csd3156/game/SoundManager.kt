@@ -4,25 +4,41 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.media.SoundPool
+import android.net.Uri
+import android.util.Log
 
 /**
  * Manages all audio playback for the application, including Background Music (BGM)
  * and Sound Effects (SFX).
+ *
+ * BGM is handled by a [MediaPlayer] that is created once and reused across play/stop
+ * cycles to avoid audio hardware re-initialization noise. SFX are handled by a
+ * [SoundPool] for low-latency playback.
  */
-class SoundManager(private val context: Context) {
-    // MediaPlayer is used for long-running audio like background music
+class SoundManager(context: Context) {
+
+    // Application context is safe to store — it lives as long as the process.
+    // Required for setDataSource(Context, Uri) which does not work with a plain String.
+    private val appContext: Context = context.applicationContext
+
+    // MediaPlayer is used for long-running audio like background music.
     private var mediaPlayer: MediaPlayer? = null
 
-    // SoundPool is optimized for short, low-latency sounds like button taps
-    private val soundPool: SoundPool
-    private var tapSoundId: Int = -1
+    // Guards against calling player methods while prepareAsync() is still running.
+    private var isPrepared = false
 
-    // Tracks if BGM is intended to be playing (e.g., active in a menu or game)
-    // Helps prevent music from auto-starting when it should be silent (like Game Over screen)
-    private var shouldPlayBGM: Boolean = false
+    // SoundPool is optimized for short, low-latency sounds like button taps.
+    private val soundPool: SoundPool
+    private var tapSoundId = -1
+
+    private val bgmUri: Uri =
+        Uri.parse("android.resource://${context.packageName}/${R.raw.bgm}")
+
+    // Tracks whether BGM is intended to be playing. Prevents music from auto-starting
+    // on screens where it should be silent (e.g. game over).
+    private var shouldPlayBgm = false
 
     init {
-        // Configure audio attributes for game usage
         val audioAttributes = AudioAttributes.Builder()
             .setUsage(AudioAttributes.USAGE_GAME)
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -33,104 +49,138 @@ class SoundManager(private val context: Context) {
             .setAudioAttributes(audioAttributes)
             .build()
 
-        // Load tap sound using direct resource referencing
         tapSoundId = soundPool.load(context, R.raw.tap_sound, 1)
+        // Silent warm-up play once loading completes, so the first audible tap
+        // doesn't trigger audio hardware initialization and produce a static pop.
+        soundPool.setOnLoadCompleteListener { pool, sampleId, _ ->
+            pool.play(sampleId, 0f, 0f, 0, 0, 1f)
+        }
     }
 
     /**
-     * Explicitly starts BGM and sets the intent to "playing".
-     * Call this when entering screens where music should play.
+     * Explicitly starts the BGM and sets the intent to "playing".
+     *
+     * Call this when entering a screen where music should play (e.g. main menu, game).
      */
     fun playBGM() {
-        shouldPlayBGM = true
+        shouldPlayBgm = true
         resumeBGM()
     }
 
     /**
-     * Resumes BGM only if it was intended to be playing.
-     * Used primarily during Activity lifecycle transitions (e.g., onStart).
+     * Resumes the BGM only if it was previously intended to be playing.
+     *
+     * Used during Activity lifecycle transitions (e.g. [android.app.Activity.onStart])
+     * to restore playback after the app returns to the foreground.
      */
     fun resumeBGM() {
-        if (!shouldPlayBGM) return
+        if (!shouldPlayBgm) return
 
         try {
             if (mediaPlayer == null) {
-                // Initialize and start if not exists
-                mediaPlayer = MediaPlayer.create(context, R.raw.bgm)
-                mediaPlayer?.apply {
+                // First-time creation: audio attributes are set BEFORE prepare so Android
+                // can route audio correctly from the start, avoiding startup static.
+                // prepareAsync() + onPreparedListener ensures playback begins only once
+                // the audio system is fully ready.
+                isPrepared = false
+                mediaPlayer = MediaPlayer().apply {
+                    setAudioAttributes(
+                        AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_GAME)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .build()
+                    )
+                    setDataSource(appContext, bgmUri)
                     isLooping = true
                     setVolume(0.2f, 0.2f)
-                    setOnErrorListener { _, _, _ ->
-                        stopBGM()
+                    setOnErrorListener { _, what, extra ->
+                        Log.e(TAG, "MediaPlayer error: what=$what, extra=$extra")
                         true
                     }
-                    start()
-                }
-            } else {
-                // Resume if already exists but paused
-                mediaPlayer?.let { player ->
-                    if (!player.isPlaying) {
-                        player.start()
+                    setOnPreparedListener { mp ->
+                        isPrepared = true
+                        // Re-check intent in case stopBGM() was called during preparation.
+                        if (shouldPlayBgm) mp.start()
                     }
+                    prepareAsync()
                 }
+            } else if (isPrepared) {
+                // Reuse the existing player — no new stream creation, no static.
+                mediaPlayer?.let { if (!it.isPlaying) it.start() }
             }
         } catch (e: Exception) {
-            stopBGM()
+            Log.e(TAG, "Exception in resumeBGM", e)
         }
     }
 
     /**
      * Pauses the BGM without clearing the intent to play.
-     * Used when the app is backgrounded.
+     *
+     * Used when the app is sent to the background so playback can be restored
+     * seamlessly when the app returns to the foreground.
      */
     fun pauseBGM() {
+        if (!isPrepared) return
         try {
-            mediaPlayer?.let { player ->
-                if (player.isPlaying) {
-                    player.pause()
-                }
-            }
+            mediaPlayer?.let { if (it.isPlaying) it.pause() }
         } catch (e: Exception) {
-            // Ignore errors on pause to prevent crashes
+            Log.e(TAG, "Exception in pauseBGM", e)
         }
     }
 
     /**
-     * Stops the BGM completely and sets the intent to "not playing".
-     * Call this when entering screens where music should be silent (e.g., Game Over).
+     * Stops the BGM and marks the intent as "not playing".
+     *
+     * The [MediaPlayer] is paused and rewound rather than released, so the next
+     * [playBGM] call can restart silently by reusing the existing player. Releasing
+     * and recreating the player causes a static pop from audio hardware re-initialization.
      */
     fun stopBGM() {
-        shouldPlayBGM = false
+        shouldPlayBgm = false
+        if (!isPrepared) return
         try {
-            mediaPlayer?.apply {
-                if (isPlaying) {
-                    stop()
-                }
-                release()
+            mediaPlayer?.let {
+                if (it.isPlaying) it.pause()
+                it.seekTo(0)
             }
         } catch (e: Exception) {
-            // Ignore errors on stop/release
-        } finally {
-            mediaPlayer = null
+            Log.e(TAG, "Exception in stopBGM", e)
         }
     }
 
     /**
-     * Plays the tap sound effect with a short delay/low latency.
-     * Pitch can be adjusted by changing the last 'rate' parameter (1.0f = normal).
+     * Plays the tap sound effect.
+     *
+     * Routed through [SoundPool] for minimal latency.
      */
     fun playTapSound() {
         if (tapSoundId != -1) {
-            // Parameters: soundID, leftVol, rightVol, priority, loop, rate
             soundPool.play(tapSoundId, 1f, 1f, 0, 0, 1f)
         }
     }
 
     /**
-     * Releases SoundPool resources when they are no longer needed.
+     * Releases all audio resources.
+     *
+     * Should be called from [android.app.Activity.onDestroy] to prevent resource leaks.
      */
     fun release() {
-        stopBGM()
+        shouldPlayBgm = false
+        isPrepared = false
+        try {
+            mediaPlayer?.apply {
+                if (isPlaying) stop()
+                release()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception in release", e)
+        } finally {
+            mediaPlayer = null
+        }
         soundPool.release()
+    }
+
+    companion object {
+        private const val TAG = "SoundManager"
     }
 }

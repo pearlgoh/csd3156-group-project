@@ -7,60 +7,65 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
-import androidx.compose.foundation.layout.ContextualFlowRow
+import androidx.core.content.edit
 
-class VibrationManager(private val context: Context) {
+/**
+ * Manages haptic feedback for the application.
+ *
+ * Vibration is suppressed when the device is in silent mode and can be toggled
+ * globally through [isVibrationEnabled], which is persisted across sessions via
+ * [SharedPreferences].
+ */
+class VibrationManager(context: Context) {
 
-    private val prefs: SharedPreferences = context.getSharedPreferences("game_prefs", Context.MODE_PRIVATE)
+    private val prefs: SharedPreferences =
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
+    // Obtain the Vibrator through VibratorManager on API 31+, directly on older versions.
     private val vibrator: Vibrator by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             context.getSystemService(VibratorManager::class.java).defaultVibrator
         } else {
-            @Suppress("DEPRECATION")
             context.getSystemService(Vibrator::class.java)
         }
     }
-    private val audioManager: AudioManager by lazy{
+
+    private val audioManager: AudioManager by lazy {
         context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     }
 
+    /**
+     * Whether vibration feedback is enabled.
+     *
+     * Reads from and writes to [SharedPreferences] so the setting persists across
+     * app launches. Defaults to `true`.
+     */
     var isVibrationEnabled: Boolean
         get() = prefs.getBoolean(PREF_VIBRATION, true)
-        set(value) = prefs.edit().putBoolean(PREF_VIBRATION, value).apply()
+        set(value) { prefs.edit { putBoolean(PREF_VIBRATION, value) } }
 
-    private fun canVibrate() : Boolean{
-        if(!isVibrationEnabled) return false
-        val ringerMode = audioManager.ringerMode
-        //skip on RINGER_MODE_SILENT
-        return ringerMode != AudioManager.RINGER_MODE_SILENT
+    /** Returns `true` if the device can currently vibrate (enabled and not in silent mode). */
+    private fun canVibrate(): Boolean {
+        if (!isVibrationEnabled) return false
+        return audioManager.ringerMode != AudioManager.RINGER_MODE_SILENT
     }
 
-    fun vibrateOnTap(){
-        if(!canVibrate()) return
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(VibrationEffect.createOneShot(30L, VibrationEffect.DEFAULT_AMPLITUDE))
-        }else  {
-            @Suppress("DEPRECATION")
-            vibrator.vibrate(30L)
-        }
-    }
-
-    fun vibrateOnFail(){
+    /** Plays a short vibration pulse to confirm a successful tile tap. */
+    fun vibrateOnTap() {
         if (!canVibrate()) return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Two-pulse pattern: buzz, pause, buzz
-            val timings = longArrayOf(0L, 120L, 80L, 200L)
-            val amplitudes = intArrayOf(0, VibrationEffect.DEFAULT_AMPLITUDE, 0, VibrationEffect.DEFAULT_AMPLITUDE)
-            vibrator.vibrate(VibrationEffect.createWaveform(timings, amplitudes, -1))
-        } else {
-            @Suppress("DEPRECATION")
-            vibrator.vibrate(longArrayOf(0L, 120L, 80L, 200L), -1)
-        }
+        vibrator.vibrate(VibrationEffect.createOneShot(30L, VibrationEffect.DEFAULT_AMPLITUDE))
     }
 
-    companion object{
+    /** Plays a two-pulse vibration pattern to signal a game-over event. */
+    fun vibrateOnFail() {
+        if (!canVibrate()) return
+        val timings = longArrayOf(0L, 120L, 80L, 200L)
+        val amplitudes = intArrayOf(0, VibrationEffect.DEFAULT_AMPLITUDE, 0, VibrationEffect.DEFAULT_AMPLITUDE)
+        vibrator.vibrate(VibrationEffect.createWaveform(timings, amplitudes, -1))
+    }
+
+    companion object {
+        private const val PREFS_NAME = "game_prefs"
         private const val PREF_VIBRATION = "vibration_enabled"
     }
 }
-
