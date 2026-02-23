@@ -46,6 +46,7 @@ class GameViewModel : ViewModel() {
 
         if (gameOver && !state.gameOver) {
             App.soundManager.stopBGM()
+            App.vibrationManager.vibrateOnFail()
         }
 
         _gameState.value = state.copy(
@@ -72,12 +73,14 @@ class GameViewModel : ViewModel() {
             index == 0
         ) {
             App.soundManager.playTapSound()
+            App.vibrationManager.vibrateOnTap()
             _gameState.value = state.copy(
                 tiles = state.tiles.drop(1),
                 score = state.score + 1
             )
         } else {
             App.soundManager.stopBGM()
+            App.vibrationManager.vibrateOnFail()
             _gameState.value = state.copy(gameOver = true)
         }
     }

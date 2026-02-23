@@ -34,6 +34,7 @@ import androidx.compose.runtime.getValue
 fun MainMenuScreen(
     onPlay: () -> Unit,
     onScoreboard: () -> Unit,
+    onSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     // From HEAD: pulse animation
@@ -123,6 +124,16 @@ fun MainMenuScreen(
                 )
             ) {
                 Text("Scoreboard", fontSize = 20.sp)
+            }
+
+            OutlinedButton(
+                onClick = onSettings,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = Color.White
+                )
+            ) {
+                Text("Settings", fontSize = 20.sp)
             }
 
             Spacer(modifier = Modifier.weight(0.7f))
