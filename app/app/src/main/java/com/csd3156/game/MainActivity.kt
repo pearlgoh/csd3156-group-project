@@ -115,6 +115,9 @@ fun Nav(mod: Modifier, ctx: Context, gameView: GameViewModel, scoreboardViewMode
                     viewModel = gameView,
                     onGameOver = { score ->
                         backstack.add(GameOverView(score))
+                    },
+                    onHome = {
+                        while (backstack.size > 1) backstack.removeLastOrNull()
                     }
                 )
             }
