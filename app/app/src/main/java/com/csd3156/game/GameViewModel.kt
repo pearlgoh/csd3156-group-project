@@ -33,10 +33,10 @@ class GameViewModel : ViewModel() {
         if (state.gameOver || state.isPaused) return
 
         val column = Random.nextInt(COLUMN_COUNT)
-        val newPos = if (gameState.value.tiles.isEmpty()) {
+        val newPos = if (state.tiles.isEmpty()) {
             -TILE_HEIGHT
         } else {
-            -TILE_HEIGHT + gameState.value.tiles.last().y
+            -TILE_HEIGHT + state.tiles.last().y
         }
 
         _gameState.update { state ->
@@ -76,13 +76,27 @@ class GameViewModel : ViewModel() {
         )
     }
 
+    /**
+     * Pauses the game and BGM at its current position. Has no effect if the game is already over.
+     *
+     * Uses [SoundManager.pauseGameBGM] so the BGM resumes from the same position
+     * and the Activity lifecycle cannot auto-restart it while the pause screen is shown.
+     */
     fun pauseGame() {
         val state = _gameState.value
         if (state.gameOver) return
+        App.soundManager.pauseGameBGM()
         _gameState.update { it.copy(isPaused = true) }
     }
 
+    /**
+     * Resumes the game and BGM from a paused state.
+     *
+     * Uses [SoundManager.resumeGameBGM] to restore playback from the exact position
+     * it was paused at and re-enable normal lifecycle audio management.
+     */
     fun resumeGame() {
+        App.soundManager.resumeGameBGM()
         _gameState.update { it.copy(isPaused = false) }
     }
 
@@ -103,7 +117,7 @@ class GameViewModel : ViewModel() {
      */
     fun handleTap(tile: Tile, index: Int) {
         val state = _gameState.value
-        if (state.gameOver || state.isPaused ) return
+        if (state.gameOver || state.isPaused) return
 
         val firstTile = state.tiles.firstOrNull()
 
