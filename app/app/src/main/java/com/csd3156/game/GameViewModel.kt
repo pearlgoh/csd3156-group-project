@@ -29,6 +29,8 @@ class GameViewModel : ViewModel() {
      */
     fun spawnTile() {
         if (tileBuffer > 0f) return
+        val state = _gameState.value
+        if (state.gameOver || state.isPaused) return
 
         val column = Random.nextInt(COLUMN_COUNT)
         val newPos = if (gameState.value.tiles.isEmpty()) {
@@ -53,7 +55,7 @@ class GameViewModel : ViewModel() {
      */
     fun updateTiles(screenHeight: Float) {
         val state = _gameState.value
-        if (state.gameOver) return
+        if (state.gameOver || state.isPaused) return
 
         if (tileBuffer > 0f) {
             tileBuffer -= state.speed
@@ -74,7 +76,16 @@ class GameViewModel : ViewModel() {
         )
     }
 
-    /** Stops the BGM and resets the game state back to its initial values. */
+    fun pauseGame() {
+        val state = _gameState.value
+        if (state.gameOver) return
+        _gameState.update { it.copy(isPaused = true) }
+    }
+
+    fun resumeGame() {
+        _gameState.update { it.copy(isPaused = false) }
+    }
+
     fun resetGame() {
         App.soundManager.stopBGM()
         _gameState.value = GameState()
@@ -92,7 +103,7 @@ class GameViewModel : ViewModel() {
      */
     fun handleTap(tile: Tile, index: Int) {
         val state = _gameState.value
-        if (state.gameOver) return
+        if (state.gameOver || state.isPaused ) return
 
         val firstTile = state.tiles.firstOrNull()
 

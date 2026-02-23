@@ -2,15 +2,22 @@ package com.csd3156.game
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,6 +55,7 @@ fun GameScreen(
     viewModel: GameViewModel,
     modifier: Modifier,
     onGameOver: (score: Int) -> Unit = {},
+    onHome: () -> Unit = {}
 ) {
     val columnCount = 4
 
@@ -64,8 +72,8 @@ fun GameScreen(
     var boxSize by remember { mutableStateOf(IntSize.Zero) }
 
     // Game loop: spawn and advance tiles at ~60 fps until game-over.
-    LaunchedEffect(state.gameOver, boxSize) {
-        if (!state.gameOver && boxSize.height > 0) {
+    LaunchedEffect(state.gameOver, state.isPaused ,boxSize) {
+        if (!state.gameOver && !state.isPaused && boxSize.height > 0) {
             while (true) {
                 viewModel.spawnTile()
                 viewModel.updateTiles(boxSize.height.toFloat())
@@ -135,6 +143,78 @@ fun GameScreen(
                 )
             }
         }
+
+        // Settings / pause button - top right of screen
+        IconButton(
+            onClick = { viewModel.pauseGame() },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 36.dp, end = 12.dp)
+                .background(
+                    color = Color.Black.copy(alpha = 0.45f),
+                    shape = RoundedCornerShape(50)
+                )
+        ) {
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = "Pause",
+                tint = Color.White,
+                modifier = Modifier.size(26.dp)
+            )
+        }
+
+
+        if (state.isPaused) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.65f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 48.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = "PAUSED",
+                        fontSize = 52.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        letterSpacing = 2.sp,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Button(
+                        onClick = { viewModel.resumeGame() },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White.copy(alpha = 0.20f),
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text("Resume", fontSize = 18.sp)
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            viewModel.resetGame()
+                            onHome()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text("Home", fontSize = 18.sp)
+                    }
+                }
+            }
+        }
+
+
     }
 }
 

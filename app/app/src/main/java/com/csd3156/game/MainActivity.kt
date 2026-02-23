@@ -105,13 +105,18 @@ fun Nav(modifier: Modifier, gameView: GameViewModel, scoreboardViewModel: Scoreb
                     )
                 }
 
-                is GameView -> NavEntry(key) {
-                    GameScreen(
-                        modifier = modifier,
-                        viewModel = gameView,
-                        onGameOver = { score -> backstack.add(GameOverView(score)) },
-                    )
-                }
+            is GameView -> NavEntry(key) {
+                GameScreen(
+                    modifier = modifier,
+                    viewModel = gameView,
+                    onGameOver = { score ->
+                        backstack.add(GameOverView(score))
+                    },
+                    onHome = {
+                        while (backstack.size > 1) backstack.removeLastOrNull()
+                    }
+                )
+            }
 
                 is GameOverView -> NavEntry(key) {
                     GameOverScreen(
