@@ -36,6 +36,7 @@ import androidx.compose.runtime.LaunchedEffect
 fun MainMenuScreen(
     onPlay: () -> Unit,
     onScoreboard: () -> Unit,
+    onSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LaunchedEffect(Unit) {
@@ -129,6 +130,16 @@ fun MainMenuScreen(
                 )
             ) {
                 Text("Scoreboard", fontSize = 20.sp)
+            }
+
+            OutlinedButton(
+                onClick = onSettings,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = Color.White
+                )
+            ) {
+                Text("Settings", fontSize = 20.sp)
             }
 
             Spacer(modifier = Modifier.weight(0.7f))

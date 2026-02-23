@@ -37,6 +37,7 @@ import com.csd3156.game.ui.ScoreboardViewModel
 import com.csd3156.game.ui.theme.GameTheme
 import androidx.activity.viewModels
 import androidx.compose.ui.unit.dp
+import com.csd3156.game.ui.SettingsScreen
 
 class MainActivity : ComponentActivity() {
     private val gameView by viewModels<GameViewModel>()
@@ -71,6 +72,7 @@ data object MainMenuView
 data object GameView
 data class GameOverView(val score: Int)
 data object ScoreboardView
+data object SettingsView
 
 @Composable
 fun Nav(mod: Modifier, ctx: Context, gameView: GameViewModel, scoreboardViewModel: ScoreboardViewModel) {
@@ -103,6 +105,9 @@ fun Nav(mod: Modifier, ctx: Context, gameView: GameViewModel, scoreboardViewMode
                     },
                     onScoreboard = {
                         backstack.add(ScoreboardView)
+                    },
+                    onSettings = {
+                        backstack.add(SettingsView)
                     },
                     modifier = mod
                 )
@@ -143,6 +148,15 @@ fun Nav(mod: Modifier, ctx: Context, gameView: GameViewModel, scoreboardViewMode
                     },
                     modifier = mod,
                     viewModel = scoreboardViewModel
+                )
+            }
+
+            is SettingsView -> NavEntry(key) {
+                SettingsScreen(
+                    onBack = {
+                        backstack.removeLastOrNull()
+                    },
+                    modifier = mod
                 )
             }
 
