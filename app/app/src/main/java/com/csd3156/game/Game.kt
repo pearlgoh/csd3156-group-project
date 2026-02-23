@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -58,6 +59,16 @@ fun GameScreen(viewModel: GameViewModel, modifier: Modifier, context: Context, o
 
     var boxSize by remember { mutableStateOf(IntSize.Zero) }
 
+    LaunchedEffect(state.gameOver, boxSize) {
+        if (!state.gameOver && boxSize.height > 0) {
+            while (true) {
+                viewModel.spawnTile()
+                viewModel.updateTiles(boxSize.height.toFloat())
+                kotlinx.coroutines.delay(16)
+            }
+        }
+    }
+
     Box(modifier = modifier.fillMaxSize().onSizeChanged { size -> boxSize = size }) {
         // Dark gradient background
         Canvas(modifier = Modifier.fillMaxSize()) {
@@ -81,11 +92,6 @@ fun GameScreen(viewModel: GameViewModel, modifier: Modifier, context: Context, o
                     end = Offset(x, size.height),
                     strokeWidth = 3f
                 )
-            }
-
-            if (!state.gameOver) {
-                viewModel.spawnTile()
-                viewModel.updateTiles(size.height)
             }
         }
 

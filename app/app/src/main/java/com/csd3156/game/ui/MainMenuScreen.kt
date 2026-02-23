@@ -29,6 +29,8 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.getValue
+import com.csd3156.game.App
+import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun MainMenuScreen(
@@ -36,6 +38,10 @@ fun MainMenuScreen(
     onScoreboard: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    LaunchedEffect(Unit) {
+        App.soundManager.playBGM()
+    }
+
     // From HEAD: pulse animation
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val pulseScale by infiniteTransition.animateFloat(

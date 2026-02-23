@@ -51,14 +51,14 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        App.soundManager.pauseBGM()
+    override fun onStart() {
+        super.onStart()
+        App.soundManager.resumeBGM()
     }
 
-    override fun onResume() {
-        super.onResume()
-        App.soundManager.playBGM()
+    override fun onStop() {
+        super.onStop()
+        App.soundManager.pauseBGM()
     }
 }
 
