@@ -2,7 +2,7 @@ package com.csd3156.game
 
 import android.app.Application
 
-class App: Application() {
+class App : Application() {
     companion object {
         lateinit var soundManager: SoundManager
             private set

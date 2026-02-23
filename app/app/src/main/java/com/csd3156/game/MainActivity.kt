@@ -60,6 +60,11 @@ class MainActivity : ComponentActivity() {
         super.onStop()
         App.soundManager.pauseBGM()
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        App.soundManager.release()
+    }
 }
 
 data object MainMenuView
@@ -88,10 +93,10 @@ fun Nav(mod: Modifier, ctx: Context, gameView: GameViewModel, scoreboardViewMode
             rememberSaveableStateHolderNavEntryDecorator(),
             rememberViewModelStoreNavEntryDecorator()
         ),
-        entryProvider = {
-                key -> when(key) {
-            is MainMenuView -> NavEntry(key) {
-                MainMenuScreen(
+        entryProvider = { key ->
+            when (key) {
+                is MainMenuView -> NavEntry(key) {
+                    MainMenuScreen(
                     onPlay = {
                         gameView.resetGame()
                         backstack.add(GameView)

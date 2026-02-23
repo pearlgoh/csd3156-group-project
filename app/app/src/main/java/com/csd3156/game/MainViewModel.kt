@@ -12,11 +12,11 @@ import javax.inject.Inject
 import kotlin.jvm.java
 
 @HiltViewModel
-class MainViewModel @Inject constructor(/*private val repository: Repository*/): ViewModel() {
+class MainViewModel @Inject constructor(/*private val repository: Repository*/) : ViewModel() {
 
 }
 
-class MainViewModelFactory(/*private val repository: Repository*/): ViewModelProvider.Factory {
+class MainViewModelFactory(/*private val repository: Repository*/) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")

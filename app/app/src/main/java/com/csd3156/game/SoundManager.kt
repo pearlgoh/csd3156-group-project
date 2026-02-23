@@ -12,11 +12,11 @@ import android.media.SoundPool
 class SoundManager(private val context: Context) {
     // MediaPlayer is used for long-running audio like background music
     private var mediaPlayer: MediaPlayer? = null
-    
+
     // SoundPool is optimized for short, low-latency sounds like button taps
     private val soundPool: SoundPool
     private var tapSoundId: Int = -1
-    
+
     // Tracks if BGM is intended to be playing (e.g., active in a menu or game)
     // Helps prevent music from auto-starting when it should be silent (like Game Over screen)
     private var shouldPlayBGM: Boolean = false
@@ -33,11 +33,8 @@ class SoundManager(private val context: Context) {
             .setAudioAttributes(audioAttributes)
             .build()
 
-        // Load tap sound from res/raw/tap_sound.mp3
-        val tapResId = context.resources.getIdentifier("tap_sound", "raw", context.packageName)
-        if (tapResId != 0) {
-            tapSoundId = soundPool.load(context, tapResId, 1)
-        }
+        // Load tap sound using direct resource referencing
+        tapSoundId = soundPool.load(context, R.raw.tap_sound, 1)
     }
 
     /**
@@ -56,13 +53,10 @@ class SoundManager(private val context: Context) {
     fun resumeBGM() {
         if (!shouldPlayBGM) return
 
-        val bgmResId = context.resources.getIdentifier("bgm", "raw", context.packageName)
-        if (bgmResId == 0) return
-
         try {
             if (mediaPlayer == null) {
                 // Initialize and start if not exists
-                mediaPlayer = MediaPlayer.create(context, bgmResId)
+                mediaPlayer = MediaPlayer.create(context, R.raw.bgm)
                 mediaPlayer?.apply {
                     isLooping = true
                     setVolume(0.2f, 0.2f)
@@ -74,8 +68,10 @@ class SoundManager(private val context: Context) {
                 }
             } else {
                 // Resume if already exists but paused
-                if (!mediaPlayer!!.isPlaying) {
-                    mediaPlayer?.start()
+                mediaPlayer?.let { player ->
+                    if (!player.isPlaying) {
+                        player.start()
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -89,8 +85,10 @@ class SoundManager(private val context: Context) {
      */
     fun pauseBGM() {
         try {
-            if (mediaPlayer?.isPlaying == true) {
-                mediaPlayer?.pause()
+            mediaPlayer?.let { player ->
+                if (player.isPlaying) {
+                    player.pause()
+                }
             }
         } catch (e: Exception) {
             // Ignore errors on pause to prevent crashes
@@ -105,7 +103,9 @@ class SoundManager(private val context: Context) {
         shouldPlayBGM = false
         try {
             mediaPlayer?.apply {
-                if (isPlaying) stop()
+                if (isPlaying) {
+                    stop()
+                }
                 release()
             }
         } catch (e: Exception) {
@@ -124,5 +124,13 @@ class SoundManager(private val context: Context) {
             // Parameters: soundID, leftVol, rightVol, priority, loop, rate
             soundPool.play(tapSoundId, 1f, 1f, 0, 0, 1f)
         }
+    }
+
+    /**
+     * Releases SoundPool resources when they are no longer needed.
+     */
+    fun release() {
+        stopBGM()
+        soundPool.release()
     }
 }

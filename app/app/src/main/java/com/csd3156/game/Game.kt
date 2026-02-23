@@ -38,7 +38,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun GameScreen(viewModel: GameViewModel, modifier: Modifier, context: Context, onGameOver: (score: Int) -> Unit = {}) {
+fun GameScreen(
+    viewModel: GameViewModel,
+    modifier: Modifier,
+    context: Context,
+    onGameOver: (score: Int) -> Unit = {}
+) {
     val columnCount = 4
 
     LaunchedEffect(Unit) {

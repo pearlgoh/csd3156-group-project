@@ -20,7 +20,7 @@ class GameViewModel : ViewModel() {
         if (tileBuffer > 0f) return
 
         val column = Random.nextInt(columnCount)
-        val newPos = if(gameState.value.tiles.isEmpty()) -tileHeight else -tileHeight + gameState.value.tiles.last().y
+        val newPos = if (gameState.value.tiles.isEmpty()) -tileHeight else -tileHeight + gameState.value.tiles.last().y
 
         _gameState.update { state ->
             state.copy(
