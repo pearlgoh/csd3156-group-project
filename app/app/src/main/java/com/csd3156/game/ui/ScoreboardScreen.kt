@@ -35,8 +35,8 @@ private val Bronze = Color(0xFFCD7F32)
 
 @Composable
 fun ScoreboardScreen(
-    onBack: () -> Unit = {},
     modifier: Modifier = Modifier,
+    onBack: () -> Unit = {},
     viewModel: ScoreboardViewModel = viewModel()
 ) {
     val localScores by viewModel.topScores.collectAsState()

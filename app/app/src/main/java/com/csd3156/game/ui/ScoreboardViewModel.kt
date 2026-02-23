@@ -44,9 +44,9 @@ class ScoreboardViewModel(application: Application) : AndroidViewModel(applicati
         _isShowingGlobal.value = !_isShowingGlobal.value
     }
 
-    fun clearScores() {
-        viewModelScope.launch {
-            repository.clearScores()
-        }
-    }
+    //fun clearScores() {
+    //    viewModelScope.launch {
+    //        repository.clearScores()
+    //    }
+    //}
 }

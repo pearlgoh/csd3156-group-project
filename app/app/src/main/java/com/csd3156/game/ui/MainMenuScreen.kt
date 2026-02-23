@@ -1,6 +1,5 @@
 package com.csd3156.game.ui
 
-import androidx.compose.animation.core.InfiniteTransition
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
